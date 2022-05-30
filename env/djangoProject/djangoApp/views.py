@@ -9,38 +9,37 @@ from django.contrib.auth.forms import AuthenticationForm
 def homepage(request):
 	return render(request=request, template_name='main/home.html')
 
-from django.shortcuts import  render, redirect
+def login_request(request):
+	if request.method == 'POST':
+		username = request.POST.get('username')
+		password = request.POST.get('password')
+
+		user = authenticate(request, username=username, password=password)
+
+		if user is not None:
+			login(request, username)
+			return redirect('djangoApp:homepage')
+		else:
+			messages.info(request, 'El nombre de usuario o la contraseña son incorrectos')
+	
+	context = {}
+	return render(request, "main/login.html", context)
 
 def register_request(request):
-	if request.method == "POST":
+	form = NewUserForm()
+
+	if request.method == 'POST':
 		form = NewUserForm(request.POST)
 		if form.is_valid():
-			user = form.save()
-			login(request, user)
-			messages.success(request, "Registration successful." )
-			return redirect("djangoApp:homepage")
-		messages.error(request, "Unsuccessful registration. Invalid information.")
-	form = NewUserForm()
-	return render (request=request, template_name="main/register.html", context={"register_form":form})
+			form.save()
+			user = form.cleaned_data.get('username')
+			messages.success(request,'Cuenta registrada para ' + user)
 
-def login_request(request):
-	if request.method == "POST":
-		form = AuthenticationForm(request, data=request.POST)
-		if form.is_valid():
-			username = form.cleaned_data.get('username')
-			password = form.cleaned_data.get('password')
-			user = authenticate(username=username, password=password)
-			if user is not None:
-				login(request, user)
-				messages.info(request, f"You are now logged in as {username}.")
-				return redirect("djangoApp:homepage")
-			else:
-				messages.error(request,"Invalid username or password.")
-		else:
-			messages.error(request,"Invalid username or password.")
-	form = AuthenticationForm()
-	return render(request=request, template_name="main/login.html", context={"login_form":form})
+			return redirect("login")
 
+	context = {'form':form}
+	return render(request, "main/register.html", context)
+		
 def logout_request(request):
 	logout(request)
 	messages.info(request, "You have successfully logged out.")

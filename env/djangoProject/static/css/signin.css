@@ -1,0 +1,69 @@
+html,
+
+
+
+body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  padding-top: 40px;
+  padding-bottom: 40px;
+  background-color: #f5f5f5;
+}
+
+.form-signin {
+  width: 100%;
+  max-width: 330px;
+  padding: 15px;
+  margin: auto;
+}
+
+.form-signin .form-floating:focus-within {
+  z-index: 2;
+}
+
+.form-floating{
+  margin-bottom: 10px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.form-signin input[type="email"] {
+  margin-bottom: -1px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.form-signin input[type="password"] {
+  margin-bottom: 10px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.user_card {
+  width: 350px;
+  margin-top: auto;
+  margin-bottom: auto;
+  background: #ab8aea;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  padding: 10px;
+  box-shadow: 0 4px 8px 0 hwb(300 13% 87% / 0.2), 0 6px 20px 0 hwb(300 13% 87% / 0.2);
+  -webkit-box-shadow: 0 4px 8px 0 hwb(300 13% 87% / 0.2), 0 6px 20px 0 hwb(300 13% 87% / 0.2);
+  -moz-box-shadow: 0 4px 8px 0 hwb(300 13% 87% / 0.2), 0 6px 20px 0 hwb(300 13% 87% / 0.2);
+  border-radius: 5px;
+}
+
+.alert-fixed {
+  position:absolute; 
+  top: 0px; 
+  left: 0px; 
+  width: 100%;
+  z-index:9999; 
+  border-radius:0px
+}
