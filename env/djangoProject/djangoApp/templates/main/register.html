@@ -31,8 +31,7 @@
 </head>
 
 <body class="text-center">
-
-  {% include 'main/includes/messages.html' %}
+  
 
   {% block content %}
 
@@ -65,7 +64,9 @@
         <p>¿Ya te has registrado?   <a href="/login" class="pe-auto">Inicia Sesión</a></p>
       </div>
       <button class="w-100 btn btn-lg btn-dark" type="submit">Regístrate</button>
-      <p class="mt-5 mb-3">&copy; 2022</p>
+      <p></p>
+      {% include 'main/includes/messages.html' %}
+      <p class="mt-3 mb-3">&copy; 2022</p>
     </form>
     </div>
   </main>
