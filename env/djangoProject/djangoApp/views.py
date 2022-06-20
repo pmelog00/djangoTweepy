@@ -11,7 +11,7 @@ def homepage(request):
 
 def login_request(request):
 	if request.user.is_authenticated:
-		return redirect('dashboard')
+		return redirect('djangoApp:homepage')
 	else:
 		if request.method == 'POST':
 			username = request.POST.get('username')
