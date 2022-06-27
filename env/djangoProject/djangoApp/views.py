@@ -1,3 +1,6 @@
+import tweepy
+
+from django.conf import settings
 from django.shortcuts import render, redirect
 from .forms import NewUserForm
 from django.contrib.auth import login, authenticate, logout
@@ -5,9 +8,25 @@ from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 
 
+
 # Create your views here.
 def homepage(request):
-	return render(request=request, template_name='main/home.html')
+	if request.user.is_authenticated:
+		if request.method == 'POST':
+			content = request.POST.get('content', '')
+			if content:
+				print('Content:', content)
+
+				auth = tweepy.OAuthHandler(settings.CONSUMER_KEY, settings.CONSUMER_SECRET)
+				auth.set_access_token(settings.ACCESS_TOKEN, settings.ACCESS_TOKEN_SECRET)				
+				
+				api = tweepy.API(auth)
+				print(api.verify_credentials().screen_name)
+
+				return redirect('djangoApp:homepage')
+		return render(request=request, template_name='main/home.html')
+	else:
+		return redirect('djangoApp:login')
 
 def login_request(request):
 	if request.user.is_authenticated:
