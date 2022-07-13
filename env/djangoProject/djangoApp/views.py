@@ -1,4 +1,7 @@
 import tweepy
+import numpy as np
+import pandas as pd
+import json
 
 from django.conf import settings
 from django.shortcuts import render, redirect
@@ -13,17 +16,41 @@ from django.contrib.auth.forms import AuthenticationForm
 def homepage(request):
 	if request.user.is_authenticated:
 		if request.method == 'POST':
-			content = request.POST.get('content', '')
-			if content:
-				print('Content:', content)
-
+			username = request.POST['username']
+			quantity = request.POST['quantity']
+			if username and quantity:
 				auth = tweepy.OAuthHandler(settings.CONSUMER_KEY, settings.CONSUMER_SECRET)
 				auth.set_access_token(settings.ACCESS_TOKEN, settings.ACCESS_TOKEN_SECRET)				
-				
+					
 				api = tweepy.API(auth)
-				print(api.verify_credentials().screen_name)
-
-				return redirect('djangoApp:homepage')
+				try:
+					# Devuelve los últimos tweets según el número en el count que pongamos del usuario que indiquemos
+					tweets = api.user_timeline(screen_name=username, count=quantity)
+					df = pd.DataFrame(data=[tweet.text for tweet in tweets], columns=['tweets'])
+					df['Fecha'] = np.array([tweet.created_at for tweet in tweets])
+					#df['Texto'] = np.array([tweet.text for tweet in tweets])
+					#print(df['Texto'])
+					df['Likes'] = np.array([tweet.favorite_count for tweet in tweets])
+					#print(df['Likes'])
+					df['Retweets'] = np.array([tweet.retweet_count for tweet in tweets])
+					likes = pd.Series(data=df['Likes'].values, index=df['Fecha'])					
+					retweets = pd.Series(data=df['Retweets'].values, index=df['Fecha'])
+				except tweepy.errors.NotFound:
+					print("error")
+				
+				#print(df['Fecha'])
+				fechasString = df['Fecha'].dt.strftime('%d/%m/%Y').tolist()
+				fechasString = ",".join(fechasString)
+				fechas=fechasString.split(",")				
+				likes = df['Likes'].tolist()
+				retweets = df['Retweets'].tolist()	
+				print(retweets)		    
+				context = {
+					'fechas' :  fechas,
+					'likes' : likes,
+					'retweets' : retweets,
+				}
+				return render(request, 'main/home.html', context)
 		return render(request=request, template_name='main/home.html')
 	else:
 		return redirect('djangoApp:login')
