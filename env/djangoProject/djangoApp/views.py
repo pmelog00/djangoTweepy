@@ -72,6 +72,25 @@ def buscarTweets(request):
 		return render(request=request, template_name='main/buscarTweets.html')
 	else:
 		return redirect('djangoApp:login')
+def seguidores(request):
+	if request.user.is_authenticated:
+		if request.method == 'POST':
+			username = request.POST['username']
+
+			if username:
+				client = tweepy.Client(bearer_token=settings.BEARER_TOKEN)
+				try:
+					user = client.get_user(username=username)
+					lista_seguidores = client.get_users_followers(id=user.data.id)
+				except tweepy.errors.BadRequest:
+					print("error")		    
+				context = {
+					'lista_seguidores' : lista_seguidores
+				}
+				return render(request, 'main/seguidores.html', context)
+		return render(request=request, template_name='main/seguidores.html')
+	else:
+		return redirect('djangoApp:login')		
 def login_request(request):
 	if request.user.is_authenticated:
 		return redirect('djangoApp:homepage')
