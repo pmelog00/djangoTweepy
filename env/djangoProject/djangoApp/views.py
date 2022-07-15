@@ -54,7 +54,24 @@ def homepage(request):
 		return render(request=request, template_name='main/home.html')
 	else:
 		return redirect('djangoApp:login')
-
+def buscarTweets(request):
+	if request.user.is_authenticated:
+		if request.method == 'POST':
+			tema = request.POST['tema']
+			maximo = request.POST['max']
+			if tema and maximo:
+				client = tweepy.Client(bearer_token=settings.BEARER_TOKEN)
+				try:
+					tweets = client.search_recent_tweets(query= tema + " -is:retweet", tweet_fields=['created_at'], max_results=maximo)
+				except tweepy.errors.BadRequest:
+					print("error")		    
+				context = {
+					'tweets' : tweets,
+				}
+				return render(request, 'main/buscarTweets.html', context)
+		return render(request=request, template_name='main/buscarTweets.html')
+	else:
+		return redirect('djangoApp:login')
 def login_request(request):
 	if request.user.is_authenticated:
 		return redirect('djangoApp:homepage')
