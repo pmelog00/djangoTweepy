@@ -2,6 +2,9 @@ import tweepy
 import numpy as np
 import pandas as pd
 import json
+import datetime
+import csv
+import time
 
 from django.conf import settings
 from django.shortcuts import render, redirect
@@ -9,6 +12,7 @@ from .forms import NewUserForm
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
+from django.http import HttpResponse
 
 
 
@@ -44,7 +48,7 @@ def homepage(request):
 				fechas=fechasString.split(",")				
 				likes = df['Likes'].tolist()
 				retweets = df['Retweets'].tolist()	
-				print(retweets)		    
+		    	
 				context = {
 					'fechas' :  fechas,
 					'likes' : likes,
@@ -62,7 +66,7 @@ def buscarTweets(request):
 			if tema and maximo:
 				client = tweepy.Client(bearer_token=settings.BEARER_TOKEN)
 				try:
-					tweets = client.search_recent_tweets(query= tema + " -is:retweet", tweet_fields=['created_at'], max_results=maximo)
+					tweets = client.search_recent_tweets(query=tema + " -is:retweet", tweet_fields=['created_at'], max_results=maximo)
 				except tweepy.errors.BadRequest:
 					print("error")		    
 				context = {
@@ -72,6 +76,141 @@ def buscarTweets(request):
 		return render(request=request, template_name='main/buscarTweets.html')
 	else:
 		return redirect('djangoApp:login')
+def scrapping_csv(request):
+	if request.method == 'POST':
+		print(request.POST)
+		keywords = request.POST['keywords']
+		maximo = request.POST['max']
+		keywords_replace = keywords.replace("-"," OR ")
+		if request.POST['idioma'] == "option1":
+			idioma = "es"
+		else:
+			idioma = "en" 
+		client = tweepy.Client(bearer_token=settings.BEARER_TOKEN)
+		text_tweet_check = request.POST.get('tweet_text', False)
+		creation_date_check = request.POST.get('creation_date', False)
+		id_author_check = request.POST.get('id_author', False)
+		conv_id_check = request.POST.get('conv_id', False)
+		username_check = request.POST.get('user_name',False)
+		name_check = request.POST.get('name',False)
+		likes_check = request.POST.get('number_likes',False)
+		retweets_check = request.POST.get('number_retweets',False)
+		replies_check = request.POST.get('number_replies',False)
+		device_check = request.POST.get('device',False)
+
+		try:
+			tweets = client.search_recent_tweets(query=keywords + " -is:retweet " + "lang:" + idioma, user_fields=['description','username','name','profile_image_url'], expansions=['author_id'], tweet_fields=['created_at','author_id','conversation_id','public_metrics','source'], max_results=maximo)
+			users = {u["id"]: u for u in tweets.includes['users']}		
+		except tweepy.errors.BadRequest:
+			print("error al acceder a la API")
+
+		response = HttpResponse(
+        	content_type='text/csv',
+        	headers={'Content-Disposition': 'attachment; filename=scrapping_'+ str(datetime.datetime.now())+'.csv'},
+    	)
+		writer = csv.writer(response)
+		for tweet in tweets.data:
+			row = [tweet.id]
+			if text_tweet_check != False:
+				row.append(tweet.text.replace('\n',' '))
+			if creation_date_check != False:
+				row.append(tweet.created_at)
+			if id_author_check != False:
+				row.append(tweet.author_id)
+			if conv_id_check != False:
+				row.append(tweet.conversation_id)
+			if username_check != False:
+				if users[tweet.author_id]:
+					user = users[tweet.author_id]
+					row.append(user.username)
+			if name_check != False:
+				if users[tweet.author_id]:
+					user = users[tweet.author_id]
+					row.append(user.name)
+			if likes_check != False:
+				row.append(tweet.public_metrics.get("like_count"))
+			if retweets_check != False:
+				row.append(tweet.public_metrics.get("retweet_count"))
+			if replies_check != False:
+				row.append(tweet.public_metrics.get("reply_count"))
+			if device_check != False:
+				row.append(tweet.source)	
+			writer.writerow(row)	
+		
+		return response
+	else:
+		return render(request=request, template_name='main/scrapearcsv.html')
+class MyStream(tweepy.Stream):
+	def on_connect(self):
+		print("Stream connected")
+	def on_status(self, status):
+		row = [status.id]
+		if hasattr(status, "retweeted_status"):  # Check if Retweet
+			try:
+				row.append(status.retweeted_status.extended_tweet["full_text"].replace('\n',' '))			
+			except AttributeError:
+				row.append(status.retweeted_status.text.replace('\n',' '))	
+		else:
+			try:
+				row.append(status.extended_tweet["full_text"].replace('\n',' '))
+			except AttributeError:
+				row.append(status.text.replace('\n',' '))
+		with open('djangoApp/resources/OutputStreaming.csv', 'a', encoding='utf-8') as f:
+			writer = csv.writer(f)
+			writer.writerow(row)
+
+printer = MyStream(
+        settings.CONSUMER_KEY, settings.CONSUMER_SECRET,
+        settings.ACCESS_TOKEN, settings.ACCESS_TOKEN_SECRET
+    )
+
+def streaming_csv(request):
+	
+	if 'start' in request.POST:
+		with open('djangoApp/resources/OutputStreaming.csv', 'w', encoding='utf-8') as f:
+			writer = csv.writer(f)
+		printer.filter(track=["bitcoin"], threaded=True, languages=["en", "es"])		
+		return render(request=request, template_name='main/streamingcsv.html')
+	elif 'finish' in request.POST:
+		printer.disconnect()
+		"""
+		keywords = request.POST['keywords']
+		maximo = request.POST['max']
+		keywords_replace = keywords.replace("-"," OR ")
+		if request.POST['idioma'] == "option1":
+			idioma = "es"
+		else:
+			idioma = "en" 
+		client = tweepy.Client(bearer_token=settings.BEARER_TOKEN)
+		id_tweet = request.POST['id_tweet']
+		text_tweet = request.POST['text']
+		print(id_tweet,text_tweet)
+		
+		try:
+			tweets = client.search_recent_tweets(query=keywords + " -is:retweet " + "lang:" + idioma, user_fields=['description','username','name','profile_image_url'], expansions=['author_id'], tweet_fields=['created_at','author_id','conversation_id'], max_results=maximo)
+			users = {u["id"]: u for u in tweets.includes['users']}
+			for tweet in tweets.data:
+				if users[tweet.author_id]:
+					user = users[tweet.author_id]
+					print(user.profile_image_url)
+				print(tweet.created_at, tweet.text, tweet.id, tweet.author_id, tweet.conversation_id)
+		except tweepy.errors.BadRequest:
+			print("error")
+
+		response = HttpResponse(
+        	content_type='text/csv',
+        	headers={'Content-Disposition': 'attachment; filename=scrapping'+ str(datetime.datetime.now())+'.csv'},
+    	)
+		writer = csv.writer(response)
+		for tweet in tweets.data:
+
+			writer.writerow([tweet.text,tweet.created_at])
+		
+		return response
+		"""
+		return render(request=request, template_name='main/streamingcsv.html')
+	else:
+		return render(request=request, template_name='main/streamingcsv.html')
 def seguidores(request):
 	if request.user.is_authenticated:
 		if request.method == 'POST':
@@ -91,6 +230,8 @@ def seguidores(request):
 		return render(request=request, template_name='main/seguidores.html')
 	else:
 		return redirect('djangoApp:login')		
+
+
 def login_request(request):
 	if request.user.is_authenticated:
 		return redirect('djangoApp:homepage')

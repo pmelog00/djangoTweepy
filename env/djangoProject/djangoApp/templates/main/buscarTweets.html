@@ -97,10 +97,12 @@
         {% block tweets %}
         <table class="table mt-4">
             <thead>
+              {% if tweets %}
               <tr>
-                <th scope="col">id</th>
-                <th scope="col">texto</th>
+                <th scope="col">Tweet ID</th>
+                <th scope="col">Texto del Tweet</th>
               </tr>
+              {% endif %}
             </thead>
             {% for tweet in tweets.data %}
             <tbody>
@@ -110,7 +112,7 @@
               </tr>
             {% endfor %}  
             </tbody>
-          </table>
+        </table>
         {% endblock %}
       </main>
     </div>
