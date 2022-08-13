@@ -84,7 +84,7 @@
       <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
         <div
           class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-          <h2 class="h2">Scrapear a csv</h2>
+          <h2 class="h2">Streaming tweets a csv</h2>
         </div>
         {% block content %}
         <form action="" method="post">
@@ -94,12 +94,6 @@
             <div class="col-sm-2">
               <input type="text" class="form-control" placeholder="término1-término2-término3..."
                 name="keywords" id="inputKeywords">
-            </div>
-          </div>
-          <div class="row mb-3">
-            <label style="font-size: 15px" for="maximo" class="col-sm-2 col-form-label">Máximo de tweets a buscar</label>
-            <div class="col-sm-10">
-              <input type="number" class="mt-1" name="max" min="10" max="100" placeholder="10-100" id="maximo">
             </div>
           </div>
           <fieldset class="row mb-3">
@@ -120,42 +114,43 @@
             </div>
           </fieldset>
           <fieldset class="row mb-3">
-            <legend style="font-size: 17px" class="col-form-label col-sm-2 pt-3">Escoge los campos a analizar</legend>
+            <legend style="font-size: 17px" class="col-form-label col-sm-2 pt-3">Campos que serán exportados</legend>
             <div class="col-sm-10 mt-3">
               <div class="form-check form-check-inline">
-                <input class="form-check-input" type="checkbox" id="gridCheck1" name="id_tweet">
+                <input class="form-check-input" type="checkbox" id="gridCheck1" name="id_author" disabled checked>
                 <label class="form-check-label" for="gridCheck1">
-                  Id del tweet
+                  Id del autor
                 </label>
               </div>
               <div class="form-check form-check-inline">
-                <input class="form-check-input mb-3" type="checkbox" id="gridCheck2" name="text_tweet">
+                <input class="form-check-input mb-3" type="checkbox" id="gridCheck2" name="username" disabled checked>
                 <label class="form-check-label" for="gridCheck2">
-                  Texto del tweet
+                  Nombre de usuario
                 </label>
               </div>
               <div class="form-check form-check-inline">
-                <input class="form-check-input mb-3" type="checkbox" id="gridCheck3" name="creation_date">
+                <input class="form-check-input mb-3" type="checkbox" id="gridCheck3" name="creation_date" disabled checked>
                 <label class="form-check-label" for="gridCheck3">
                   Fecha de creación
                 </label>
               </div>
               <div class="form-check form-check-inline">
-                <input class="form-check-input mb-3" type="checkbox" id="gridCheck4" name="id_author">
+                <input class="form-check-input mb-3" type="checkbox" id="gridCheck4" name="text_tweet" disabled checked>
                 <label class="form-check-label" for="gridCheck4">
-                  Id del autor
-                </label>
-              </div>
-              <div class="form-check form-check-inline">
-                <input class="form-check-input mb-3" type="checkbox" id="gridCheck5" name="conv_id">
-                <label class="form-check-label" for="gridCheck5">
-                  Id de la conversación
+                  Texto del tweet
                 </label>
               </div>
             </div>
           </fieldset>
-          <button type="submit" class="btn btn-success" name="start">Exportar a csv</button>
-          <button type="submit" class="btn btn-primary" name="finish">Exportar a csv</button>
+          {% if stream %}
+          <button class="btn btn-primary btn-lg" type="button" disabled>
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Extrayendo a csv...
+          </button>
+          {% else %}
+          <button type="submit" class="btn btn-primary btn-lg" name="start">Comenzar Stream</button> 
+          {% endif %}
+          <button type="submit" class="btn btn-danger btn-lg ms-5" name="finish">Finalizar Stream</button>
         </form>
         {% endblock %}
       </main>

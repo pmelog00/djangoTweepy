@@ -99,7 +99,7 @@ def scrapping_csv(request):
 		device_check = request.POST.get('device',False)
 
 		try:
-			tweets = client.search_recent_tweets(query=keywords + " -is:retweet " + "lang:" + idioma, user_fields=['description','username','name','profile_image_url'], expansions=['author_id'], tweet_fields=['created_at','author_id','conversation_id','public_metrics','source'], max_results=maximo)
+			tweets = client.search_recent_tweets(query=keywords_replace + " -is:retweet " + "lang:" + idioma, user_fields=['description','username','name','profile_image_url'], expansions=['author_id'], tweet_fields=['created_at','author_id','conversation_id','public_metrics','source'], max_results=maximo)
 			users = {u["id"]: u for u in tweets.includes['users']}		
 		except tweepy.errors.BadRequest:
 			print("error al acceder a la API")
@@ -145,15 +145,23 @@ class MyStream(tweepy.Stream):
 		print("Stream connected")
 	def on_status(self, status):
 		row = [status.id]
-		if hasattr(status, "retweeted_status"):  # Check if Retweet
+		if hasattr(status, "retweeted_status"):  # Miro si es RT para coger siempre todo el texto
 			try:
+				row.append(status.author.screen_name)
+				row.append(status.created_at)
 				row.append(status.retweeted_status.extended_tweet["full_text"].replace('\n',' '))			
 			except AttributeError:
+				row.append(status.author.screen_name)
+				row.append(status.created_at)
 				row.append(status.retweeted_status.text.replace('\n',' '))	
 		else:
 			try:
+				row.append(status.author.screen_name)
+				row.append(status.created_at)
 				row.append(status.extended_tweet["full_text"].replace('\n',' '))
 			except AttributeError:
+				row.append(status.author.screen_name)
+				row.append(status.created_at)
 				row.append(status.text.replace('\n',' '))
 		with open('djangoApp/resources/OutputStreaming.csv', 'a', encoding='utf-8') as f:
 			writer = csv.writer(f)
@@ -164,50 +172,22 @@ printer = MyStream(
         settings.ACCESS_TOKEN, settings.ACCESS_TOKEN_SECRET
     )
 
-def streaming_csv(request):
-	
+def streaming_csv(request):	
 	if 'start' in request.POST:
-		with open('djangoApp/resources/OutputStreaming.csv', 'w', encoding='utf-8') as f:
-			writer = csv.writer(f)
-		printer.filter(track=["bitcoin"], threaded=True, languages=["en", "es"])		
-		return render(request=request, template_name='main/streamingcsv.html')
-	elif 'finish' in request.POST:
-		printer.disconnect()
-		"""
 		keywords = request.POST['keywords']
-		maximo = request.POST['max']
 		keywords_replace = keywords.replace("-"," OR ")
 		if request.POST['idioma'] == "option1":
 			idioma = "es"
 		else:
-			idioma = "en" 
-		client = tweepy.Client(bearer_token=settings.BEARER_TOKEN)
-		id_tweet = request.POST['id_tweet']
-		text_tweet = request.POST['text']
-		print(id_tweet,text_tweet)
-		
-		try:
-			tweets = client.search_recent_tweets(query=keywords + " -is:retweet " + "lang:" + idioma, user_fields=['description','username','name','profile_image_url'], expansions=['author_id'], tweet_fields=['created_at','author_id','conversation_id'], max_results=maximo)
-			users = {u["id"]: u for u in tweets.includes['users']}
-			for tweet in tweets.data:
-				if users[tweet.author_id]:
-					user = users[tweet.author_id]
-					print(user.profile_image_url)
-				print(tweet.created_at, tweet.text, tweet.id, tweet.author_id, tweet.conversation_id)
-		except tweepy.errors.BadRequest:
-			print("error")
-
-		response = HttpResponse(
-        	content_type='text/csv',
-        	headers={'Content-Disposition': 'attachment; filename=scrapping'+ str(datetime.datetime.now())+'.csv'},
-    	)
-		writer = csv.writer(response)
-		for tweet in tweets.data:
-
-			writer.writerow([tweet.text,tweet.created_at])
-		
-		return response
-		"""
+			idioma = "en"
+		with open('djangoApp/resources/OutputStreaming.csv', 'w', encoding='utf-8') as f:
+			writer = csv.writer(f)
+		print(keywords_replace, idioma)	
+		printer.filter(track=[keywords_replace], threaded=True, languages=[idioma])
+		context = {'stream' : True}		
+		return render(request,'main/streamingcsv.html',context)
+	elif 'finish' in request.POST:
+		printer.disconnect()
 		return render(request=request, template_name='main/streamingcsv.html')
 	else:
 		return render(request=request, template_name='main/streamingcsv.html')
