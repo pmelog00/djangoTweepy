@@ -100,7 +100,7 @@ def scrapping_csv(request):
 
 		try:
 			tweets = client.search_recent_tweets(query=keywords_replace + " -is:retweet " + "lang:" + idioma, user_fields=['description','username','name','profile_image_url'], expansions=['author_id'], tweet_fields=['created_at','author_id','conversation_id','public_metrics','source'], max_results=maximo)
-			users = {u["id"]: u for u in tweets.includes['users']}		
+			users = {u["id"]: u for u in tweets.includes['users']}
 		except tweepy.errors.BadRequest:
 			print("error al acceder a la API")
 
@@ -181,8 +181,7 @@ def streaming_csv(request):
 		else:
 			idioma = "en"
 		with open('djangoApp/resources/OutputStreaming.csv', 'w', encoding='utf-8') as f:
-			writer = csv.writer(f)
-		print(keywords_replace, idioma)	
+			writer = csv.writer(f)	
 		printer.filter(track=[keywords_replace], threaded=True, languages=[idioma])
 		context = {'stream' : True}		
 		return render(request,'main/streamingcsv.html',context)
@@ -191,6 +190,32 @@ def streaming_csv(request):
 		return render(request=request, template_name='main/streamingcsv.html')
 	else:
 		return render(request=request, template_name='main/streamingcsv.html')
+def volumen_tweets(request):
+	if request.method == 'POST':
+		keywords = request.POST['keywords']
+		keywords_replace = keywords.replace("-"," OR ")
+		if request.POST['selector'] == 1:
+			granularidad = "minute"
+		elif request.POST['selector'] == 2:
+			granularidad = "hour"
+		else:
+			granularidad = "day"
+		client = tweepy.Client(bearer_token=settings.BEARER_TOKEN)
+		counts = client.get_recent_tweets_count(query=keywords_replace + " -is:retweet", granularity=granularidad)
+		del counts.data[-1]
+		volumen = []
+		fechas = []
+		for count in counts.data:
+			volumen.append(count.get("tweet_count"))
+			fechas.append(count.get("start"))
+		#print(volumen)
+		#print(fechas)
+		context = {
+			'volumen' : volumen,
+			'fechas' : fechas
+		}
+		return render(request,'main/volumentweets.html',context)
+	return render(request=request,template_name='main/volumentweets.html')
 def seguidores(request):
 	if request.user.is_authenticated:
 		if request.method == 'POST':
