@@ -226,6 +226,7 @@ def seguidores(request):
 				try:
 					user = client.get_user(username=username)
 					lista_seguidores = client.get_users_followers(id=user.data.id)
+					print(len(lista_seguidores.data))
 				except tweepy.errors.BadRequest:
 					print("error")		    
 				context = {
