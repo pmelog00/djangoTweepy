@@ -18,7 +18,50 @@
   <script src="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js"></script>
   <script>
     $(document).ready(function () {
-      $('#seguidores').DataTable();
+      $('#seguidores').DataTable({
+        language: {
+          "decimal": "",
+          "emptyTable": "No hay información",
+          "info": "Mostrando _START_ a _END_ de _TOTAL_ Entradas",
+          "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
+          "infoFiltered": "(Filtrado de _MAX_ total entradas)",
+          "infoPostFix": "",
+          "thousands": ",",
+          "lengthMenu": "Mostrar _MENU_ Entradas",
+          "loadingRecords": "Cargando...",
+          "processing": "Procesando...",
+          "search": "Buscar:",
+          "zeroRecords": "Sin resultados encontrados",
+          "paginate": {
+            "first": "Primero",
+            "last": "Ultimo",
+            "next": "Siguiente",
+            "previous": "Anterior"
+          }
+        },
+      });
+      $('#seguidos').DataTable({
+        language: {
+          "decimal": "",
+          "emptyTable": "No hay información",
+          "info": "Mostrando _START_ a _END_ de _TOTAL_ Entradas",
+          "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
+          "infoFiltered": "(Filtrado de _MAX_ total entradas)",
+          "infoPostFix": "",
+          "thousands": ",",
+          "lengthMenu": "Mostrar _MENU_ Entradas",
+          "loadingRecords": "Cargando...",
+          "processing": "Procesando...",
+          "search": "Buscar:",
+          "zeroRecords": "Sin resultados encontrados",
+          "paginate": {
+            "first": "Primero",
+            "last": "Ultimo",
+            "next": "Siguiente",
+            "previous": "Anterior"
+          }
+        },
+      });
     });
   </script>
   <style>
@@ -93,35 +136,65 @@
           <h2 class="h2">Obtener seguidores</h2>
         </div>
         {% block content %}
-        <form action="" method="post">
+        <form class="row gy-2 gx-3 align-items-center" action="" method="post">
           {% csrf_token %}
           <div class="col-auto">
+
             <div class="input-group">
+              <label class="mt-2 me-2" style="font-size: 17px">Introduce el nombre del usuario</label>
               <div class="input-group-text">@</div>
               <input type="text" class="form-control" placeholder="Username" name="username">
-              <button type="submit" class="btn btn-dark mx-3">Analizar</button>
             </div>
+          </div>
+          <div class="col-auto">
+            <label class="mt-2 me-2" style="font-size: 17px">Introduce el número máximo de seguidores y seguidos a extraer</label>
+            <input type="number" name="max" min="1" max="1000" placeholder="1-1000" style="height: 38px">
+          </div>
+          <div class="col-auto">
+            <button type="submit" class="btn btn-dark mx-3" style="width:12em">Analizar</button>
           </div>
         </form>
         {% endblock %}
         {% block seguidores %}
-        <table id="seguidores" class="table table-striped mt-4">
-            <thead>
-              {% if lista_seguidores %}
-              <tr>
-                <th>Username</th>
-              </tr>
-              {% endif %}
-            </thead>
-            <tbody>
-            {% for seguidor in lista_seguidores.data %}
-              <tr>
-                <td>{{ seguidor.username }}</td>
-              </tr>
-            {% endfor %}  
-            </tbody>
-        </table>
-        {% endblock %}
+        <div style="width:100%">
+          <div style="width: 50%; float:left;">
+            <table id="seguidores" class="table table-striped">
+              <thead class="table-dark">
+                {% if lista_seguidores %}
+                <tr class="align-middle">
+                  <th>Seguidores</th>
+                </tr>
+                {% endif %}
+              </thead>
+              <tbody>
+                {% for seguidor in lista_seguidores.data %}
+                <tr>
+                  <td>{{ seguidor.username }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div style="width: 50%; float:left;">
+            <table id="seguidos" class="table table-striped">
+              <thead class="table-dark">
+                {% if lista_seguidos %}
+                <tr class="align-middle">
+                  <th>Seguidos</th>
+                </tr>
+                {% endif %}
+              </thead>
+              <tbody>
+                {% for seguido in lista_seguidos.data %}
+                <tr>
+                  <td>{{ seguido.username }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% endblock %}
+        </div>
       </main>
     </div>
   </div>

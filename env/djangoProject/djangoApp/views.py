@@ -220,17 +220,18 @@ def seguidores(request):
 	if request.user.is_authenticated:
 		if request.method == 'POST':
 			username = request.POST['username']
-
-			if username:
+			maximo = request.POST['max']
+			if username and maximo:
 				client = tweepy.Client(bearer_token=settings.BEARER_TOKEN)
 				try:
 					user = client.get_user(username=username)
-					lista_seguidores = client.get_users_followers(id=user.data.id)
-					print(len(lista_seguidores.data))
+					lista_seguidores = client.get_users_followers(id=user.data.id, max_results=maximo)
+					lista_seguidos = client.get_users_following(id=user.data.id, max_results=maximo)
 				except tweepy.errors.BadRequest:
 					print("error")		    
 				context = {
-					'lista_seguidores' : lista_seguidores
+					'lista_seguidores' : lista_seguidores,
+					'lista_seguidos' : lista_seguidos
 				}
 				return render(request, 'main/seguidores.html', context)
 		return render(request=request, template_name='main/seguidores.html')
