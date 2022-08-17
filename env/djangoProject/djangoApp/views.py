@@ -155,8 +155,6 @@ class MyStream(tweepy.Stream):
 				row.append(status.created_at)
 				row.append(status.retweeted_status.extended_tweet["full_text"].replace('\n',' ').replace(',',';'))		
 			except AttributeError:
-				row.append(status.author.screen_name)
-				row.append(status.created_at)
 				row.append(status.retweeted_status.text.replace('\n',' ').replace(',',';'))	
 		else:
 			try:
@@ -164,8 +162,6 @@ class MyStream(tweepy.Stream):
 				row.append(status.created_at)
 				row.append(status.extended_tweet["full_text"].replace('\n',' ').replace(',',';'))
 			except AttributeError:
-				row.append(status.author.screen_name)
-				row.append(status.created_at)
 				row.append(status.text.replace('\n',' ').replace(',',';'))
 		with open('djangoApp/resources/OutputStreaming.csv', 'a', encoding='utf-8') as f:
 			writer = csv.writer(f)
