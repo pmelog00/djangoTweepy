@@ -153,20 +153,20 @@ class MyStream(tweepy.Stream):
 			try:
 				row.append(status.author.screen_name)
 				row.append(status.created_at)
-				row.append(status.retweeted_status.extended_tweet["full_text"].replace('\n',' '))			
+				row.append(status.retweeted_status.extended_tweet["full_text"].replace('\n',' ').replace(',',';'))		
 			except AttributeError:
 				row.append(status.author.screen_name)
 				row.append(status.created_at)
-				row.append(status.retweeted_status.text.replace('\n',' '))	
+				row.append(status.retweeted_status.text.replace('\n',' ').replace(',',';'))	
 		else:
 			try:
 				row.append(status.author.screen_name)
 				row.append(status.created_at)
-				row.append(status.extended_tweet["full_text"].replace('\n',' '))
+				row.append(status.extended_tweet["full_text"].replace('\n',' ').replace(',',';'))
 			except AttributeError:
 				row.append(status.author.screen_name)
 				row.append(status.created_at)
-				row.append(status.text.replace('\n',' '))
+				row.append(status.text.replace('\n',' ').replace(',',';'))
 		with open('djangoApp/resources/OutputStreaming.csv', 'a', encoding='utf-8') as f:
 			writer = csv.writer(f)
 			writer.writerow(row)
@@ -191,7 +191,7 @@ def streaming_csv(request):
 		return render(request,'main/streamingcsv.html',context)
 	elif 'finish' in request.POST:
 		printer.disconnect()
-		messages.info(request, 'Comprueba el archivo OutputStreaming.csv')
+		messages.info(request, 'Stream finalizado. Comprueba el archivo OutputStreaming.csv')
 		return render(request=request, template_name='main/streamingcsv.html')
 	else:
 		return render(request=request, template_name='main/streamingcsv.html')
