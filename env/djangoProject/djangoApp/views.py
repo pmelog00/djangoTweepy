@@ -39,21 +39,24 @@ def homepage(request):
 					df['Retweets'] = np.array([tweet.retweet_count for tweet in tweets])
 					likes = pd.Series(data=df['Likes'].values, index=df['Fecha'])					
 					retweets = pd.Series(data=df['Retweets'].values, index=df['Fecha'])
+					#print(df['Fecha'])
+					fechasString = df['Fecha'].dt.strftime('%d/%m/%Y').tolist()
+					fechasString = ",".join(fechasString)
+					fechas=fechasString.split(",")				
+					likes = df['Likes'].tolist()
+					retweets = df['Retweets'].tolist()
+					context = {
+						'fechas' :  fechas,
+						'likes' : likes,
+						'retweets' : retweets,
+					}	
 				except tweepy.errors.NotFound:
-					print("error")
-				
-				#print(df['Fecha'])
-				fechasString = df['Fecha'].dt.strftime('%d/%m/%Y').tolist()
-				fechasString = ",".join(fechasString)
-				fechas=fechasString.split(",")				
-				likes = df['Likes'].tolist()
-				retweets = df['Retweets'].tolist()	
-		    	
-				context = {
-					'fechas' :  fechas,
-					'likes' : likes,
-					'retweets' : retweets,
-				}
+					fechas=[]
+					likes=[]
+					retweets=[]
+					context={}
+					messages.info(request, 'El nombre de usuario no existe')
+			
 				return render(request, 'main/home.html', context)
 		return render(request=request, template_name='main/home.html')
 	else:
@@ -62,11 +65,12 @@ def buscarTweets(request):
 	if request.user.is_authenticated:
 		if request.method == 'POST':
 			tema = request.POST['tema']
+			tema_replace = tema.replace("-"," OR ")
 			maximo = request.POST['max']
 			if tema and maximo:
 				client = tweepy.Client(bearer_token=settings.BEARER_TOKEN)
 				try:
-					tweets = client.search_recent_tweets(query=tema + " -is:retweet", tweet_fields=['created_at'], max_results=maximo)
+					tweets = client.search_recent_tweets(query=tema_replace + " -is:retweet", tweet_fields=['created_at'], max_results=maximo)
 				except tweepy.errors.BadRequest:
 					print("error")		    
 				context = {
@@ -187,6 +191,7 @@ def streaming_csv(request):
 		return render(request,'main/streamingcsv.html',context)
 	elif 'finish' in request.POST:
 		printer.disconnect()
+		messages.info(request, 'Comprueba el archivo OutputStreaming.csv')
 		return render(request=request, template_name='main/streamingcsv.html')
 	else:
 		return render(request=request, template_name='main/streamingcsv.html')
