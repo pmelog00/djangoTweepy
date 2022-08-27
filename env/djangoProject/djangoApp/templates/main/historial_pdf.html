@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>PDF exportado</title>
+
+        <style>
+            @page{
+                size:"A4";
+                margin: 1cm 1.5cm 3.5cm 1.5cm;
+            }
+            body {
+              width: 100% !important;
+              height: 100%;
+              background: #fff;
+              color: black;
+              font-size: 100%;
+              font-family: 'Roboto', sans-serif;
+              line-height: 1.65;
+              -webkit-font-smoothing: antialiased;
+              -webkit-text-size-adjust: none; 
+            }
+        </style>
+    </head>
+    <body>
+      <h1 class="text-center">Historial de consultas</h1>
+        {% block historial %}
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Tipo de consulta</th>
+              <th scope="col">Parámetros de la consulta</th>
+              <th scope="col">Máximo de consultas a recibir (0 cuando no se indica)</th>
+              <th scope="col">Fecha de la consulta</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in query_results %}
+              <tr>
+                <td>{{ item.tipo }}</td>
+                <td>{{ item.query }}</td>
+                <td>{{ item.maximo }}</td>
+                <td>{{ item.fecha }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% endblock %}
+    </body>
+</html>

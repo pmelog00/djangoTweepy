@@ -15,6 +15,8 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpResponse
 from .models import Busqueda
 
+from django.template.loader import render_to_string
+from weasyprint import HTML
 
 # Create your views here.
 def homepage(request):
@@ -283,8 +285,19 @@ def seguidores(request):
 	else:
 		return redirect('djangoApp:login')		
 def historial_busquedas(request):
-	query_results = Busqueda.objects.all()
+	query_results = Busqueda.objects.filter(user_id=request.user)
 	context = {'query_results' : query_results}
+	
+	if request.method == 'POST':
+		response = HttpResponse(
+        	content_type='application/pdf',
+        	headers={'Content-Disposition': 'attachment; filename=historial_'+ str(datetime.datetime.now())+'.pdf'},
+    	)
+		response['Content-Transfer-Encoding'] = 'binary'
+		html = render_to_string('main/historial_pdf.html',context)		
+		HTML(string=html).write_pdf(response)
+		return response
+		
 	return render(request,'main/historial_busquedas.html',context)
 
 def login_request(request):
