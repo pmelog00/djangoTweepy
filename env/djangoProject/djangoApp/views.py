@@ -13,7 +13,7 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpResponse
-
+from .models import Busqueda
 
 
 # Create your views here.
@@ -45,6 +45,13 @@ def homepage(request):
 					fechas=fechasString.split(",")				
 					likes = df['Likes'].tolist()
 					retweets = df['Retweets'].tolist()
+					busqueda = Busqueda()
+					busqueda.user = request.user
+					busqueda.tipo = 'Likes y Retweets'
+					busqueda.query = username
+					busqueda.maximo = quantity
+					busqueda.fecha = datetime.datetime.now().strftime("%x") + " " + datetime.datetime.now().strftime("%X")
+					busqueda.save()
 					context = {
 						'fechas' :  fechas,
 						'likes' : likes,
@@ -72,7 +79,16 @@ def buscarTweets(request):
 				try:
 					tweets = client.search_recent_tweets(query=tema_replace + " -is:retweet", tweet_fields=['created_at'], max_results=maximo)
 				except tweepy.errors.BadRequest:
-					print("error")		    
+					print("error")
+				
+				busqueda = Busqueda()
+				busqueda.user = request.user
+				busqueda.tipo = 'Buscar Tweets'
+				busqueda.query = tema
+				busqueda.maximo = maximo
+				busqueda.fecha = datetime.datetime.now().strftime("%x") + " " + datetime.datetime.now().strftime("%X")
+				busqueda.save()
+ 		    
 				context = {
 					'tweets' : tweets,
 				}
@@ -105,6 +121,13 @@ def scrapping_csv(request):
 		try:
 			tweets = client.search_recent_tweets(query=keywords_replace + " -is:retweet " + "lang:" + idioma, user_fields=['description','username','name','profile_image_url'], expansions=['author_id'], tweet_fields=['created_at','author_id','conversation_id','public_metrics','source'], max_results=maximo)
 			users = {u["id"]: u for u in tweets.includes['users']}
+			busqueda = Busqueda()
+			busqueda.user = request.user
+			busqueda.tipo = 'Scrapear a csv'
+			busqueda.query = keywords
+			busqueda.maximo = maximo
+			busqueda.fecha = datetime.datetime.now().strftime("%x") + " " + datetime.datetime.now().strftime("%X")
+			busqueda.save()
 		except tweepy.errors.BadRequest:
 			print("error al acceder a la API")
 
@@ -183,6 +206,13 @@ def streaming_csv(request):
 		with open('djangoApp/resources/OutputStreaming.csv', 'w', encoding='utf-8') as f:
 			writer = csv.writer(f)	
 		printer.filter(track=[keywords_replace], threaded=True, languages=[idioma])
+		busqueda = Busqueda()
+		busqueda.user = request.user
+		busqueda.tipo = 'Streaming a csv'
+		busqueda.query = keywords
+		busqueda.maximo = 0
+		busqueda.fecha = datetime.datetime.now().strftime("%x") + " " + datetime.datetime.now().strftime("%X")
+		busqueda.save()
 		context = {'stream' : True}		
 		return render(request,'main/streamingcsv.html',context)
 	elif 'finish' in request.POST:
@@ -211,6 +241,13 @@ def volumen_tweets(request):
 			fechas.append(count.get("start"))
 		#print(volumen)
 		#print(fechas)
+		busqueda = Busqueda()
+		busqueda.user = request.user
+		busqueda.tipo = 'Volumen de Tweets'
+		busqueda.query = keywords
+		busqueda.maximo = 0
+		busqueda.fecha = datetime.datetime.now().strftime("%x") + " " + datetime.datetime.now().strftime("%X")
+		busqueda.save()
 		context = {
 			'volumen' : volumen,
 			'fechas' : fechas
@@ -228,6 +265,13 @@ def seguidores(request):
 					user = client.get_user(username=username)
 					lista_seguidores = client.get_users_followers(id=user.data.id, max_results=maximo)
 					lista_seguidos = client.get_users_following(id=user.data.id, max_results=maximo)
+					busqueda = Busqueda()
+					busqueda.user = request.user
+					busqueda.tipo = 'Seguidores y Seguidos'
+					busqueda.query = username
+					busqueda.maximo = maximo
+					busqueda.fecha = datetime.datetime.now().strftime("%x") + " " + datetime.datetime.now().strftime("%X")
+					busqueda.save()
 				except tweepy.errors.BadRequest:
 					print("error")		    
 				context = {
@@ -238,7 +282,10 @@ def seguidores(request):
 		return render(request=request, template_name='main/seguidores.html')
 	else:
 		return redirect('djangoApp:login')		
-
+def historial_busquedas(request):
+	query_results = Busqueda.objects.all()
+	context = {'query_results' : query_results}
+	return render(request,'main/historial_busquedas.html',context)
 
 def login_request(request):
 	if request.user.is_authenticated:
