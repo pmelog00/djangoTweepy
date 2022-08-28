@@ -11,59 +11,6 @@
   <!-- Bootstrap core CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css">
-  <link rel="style" href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css">
-  <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-  <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
-  <script src="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js"></script>
-  <script>
-    $(document).ready(function () {
-      $('#seguidores').DataTable({
-        language: {
-          "decimal": "",
-          "emptyTable": "No hay información",
-          "info": "Mostrando _START_ a _END_ de _TOTAL_ Entradas",
-          "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
-          "infoFiltered": "(Filtrado de _MAX_ total entradas)",
-          "infoPostFix": "",
-          "thousands": ",",
-          "lengthMenu": "Mostrar _MENU_ Entradas",
-          "loadingRecords": "Cargando...",
-          "processing": "Procesando...",
-          "search": "Buscar:",
-          "zeroRecords": "Sin resultados encontrados",
-          "paginate": {
-            "first": "Primero",
-            "last": "Ultimo",
-            "next": "Siguiente",
-            "previous": "Anterior"
-          }
-        },
-      });
-      $('#seguidos').DataTable({
-        language: {
-          "decimal": "",
-          "emptyTable": "No hay información",
-          "info": "Mostrando _START_ a _END_ de _TOTAL_ Entradas",
-          "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
-          "infoFiltered": "(Filtrado de _MAX_ total entradas)",
-          "infoPostFix": "",
-          "thousands": ",",
-          "lengthMenu": "Mostrar _MENU_ Entradas",
-          "loadingRecords": "Cargando...",
-          "processing": "Procesando...",
-          "search": "Buscar:",
-          "zeroRecords": "Sin resultados encontrados",
-          "paginate": {
-            "first": "Primero",
-            "last": "Ultimo",
-            "next": "Siguiente",
-            "previous": "Anterior"
-          }
-        },
-      });
-    });
-  </script>
   <style>
     .bd-placeholder-img {
       font-size: 1.125rem;
@@ -79,7 +26,6 @@
       }
     }
   </style>
-
 
   <!-- Custom styles for this template -->
   <link rel="stylesheet" href="{% static 'css/dashboard.css'%}">
@@ -117,7 +63,7 @@
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link active" href="/seguidores" aria-current="page">
+              <a class="nav-link" href="/seguidores">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-people-fill" viewBox="0 0 16 16">
                   <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
                   <path fill-rule="evenodd" d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216z"/>
@@ -151,7 +97,7 @@
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/liked_tweets">
+              <a class="nav-link active" href="/liked_tweets" aria-current="page">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16">
                   <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
                 </svg>
@@ -173,7 +119,7 @@
       <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
         <div
           class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-          <h2 class="h2">Obtener seguidores</h2>
+          <h2 class="h2">Tweets likeados por el usuario que se indique</h2>
         </div>
         {% block content %}
         <form class="row gy-2 gx-3 align-items-center" action="" method="post">
@@ -186,64 +132,43 @@
             </div>
           </div>
           <div class="col-auto">
-            <label class="mt-2 me-2" style="font-size: 17px">Introduce el número máximo de seguidores y seguidos a extraer</label>
-            <input type="number" name="max" min="1" max="1000" placeholder="1-1000" style="height: 38px">
+            <label class="mt-2 me-2" style="font-size: 17px">Introduce el número máximo de tweets a extraer</label>
+            <input type="number" name="max" min="5" max="100" placeholder="5-100" style="height: 38px">
           </div>
           <div class="col-auto">
             <button type="submit" class="btn btn-dark mx-3" style="width:12em">Analizar</button>
           </div>
         </form>
         {% endblock %}
-        {% block seguidores %}
-        <div style="width:100%">
-          <div style="width: 50%; float:left;">
-            <table id="seguidores" class="table table-striped">
-              <thead class="table-dark">
-                {% if lista_seguidores %}
-                <tr class="align-middle">
-                  <th>Seguidores</th>
-                </tr>
-                {% endif %}
-              </thead>
-              <tbody>
-                {% for seguidor in lista_seguidores.data %}
-                <tr>
-                  <td>{{ seguidor.username }}</td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-          <div style="width: 50%; float:left;">
-            <table id="seguidos" class="table table-striped">
-              <thead class="table-dark">
-                {% if lista_seguidos %}
-                <tr class="align-middle">
-                  <th>Seguidos</th>
-                </tr>
-                {% endif %}
-              </thead>
-              <tbody>
-                {% for seguido in lista_seguidos.data %}
-                <tr>
-                  <td>{{ seguido.username }}</td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-          {% endblock %}
-        </div>
+        {% block tweets %}
+        <table class="table mt-4">
+          <thead>
+            {% if lista_definitiva %}
+            <tr>
+              <th scope="col">Tweet ID</th>
+              <th scope="col">Texto del Tweet</th>
+              <th scope="col">Nombre de usuario</th>
+            </tr>
+            {% endif %}
+          </thead>
+          {% for tweet, usuario in lista_definitiva %}
+          <tbody>
+            <tr>
+              <td>{{ tweet.id }}</td>
+              <td>{{ tweet.text }}</td>    
+              <td>{{ usuario }}</td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        {% endblock %}
       </main>
     </div>
   </div>
   <!-- Javascript -->
-  
-  <!--
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
     crossorigin="anonymous"></script>
-  -->
 </body>
 
 </html>

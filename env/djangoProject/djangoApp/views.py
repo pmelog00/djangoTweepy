@@ -82,7 +82,7 @@ def buscarTweets(request):
 					tweets = client.search_recent_tweets(query=tema_replace + " -is:retweet", tweet_fields=['created_at'], max_results=maximo)
 				except tweepy.errors.BadRequest:
 					print("error")
-				
+
 				busqueda = Busqueda()
 				busqueda.user = request.user
 				busqueda.tipo = 'Buscar Tweets'
@@ -90,7 +90,7 @@ def buscarTweets(request):
 				busqueda.maximo = maximo
 				busqueda.fecha = datetime.datetime.now().strftime("%x") + " " + datetime.datetime.now().strftime("%X")
 				busqueda.save()
- 		    
+ 	
 				context = {
 					'tweets' : tweets,
 				}
@@ -267,6 +267,7 @@ def seguidores(request):
 					user = client.get_user(username=username)
 					lista_seguidores = client.get_users_followers(id=user.data.id, max_results=maximo)
 					lista_seguidos = client.get_users_following(id=user.data.id, max_results=maximo)
+
 					busqueda = Busqueda()
 					busqueda.user = request.user
 					busqueda.tipo = 'Seguidores y Seguidos'
@@ -274,6 +275,7 @@ def seguidores(request):
 					busqueda.maximo = maximo
 					busqueda.fecha = datetime.datetime.now().strftime("%x") + " " + datetime.datetime.now().strftime("%X")
 					busqueda.save()
+			
 				except tweepy.errors.BadRequest:
 					print("error")		    
 				context = {
@@ -283,7 +285,44 @@ def seguidores(request):
 				return render(request, 'main/seguidores.html', context)
 		return render(request=request, template_name='main/seguidores.html')
 	else:
-		return redirect('djangoApp:login')		
+		return redirect('djangoApp:login')
+def liked_tweets(request):
+	if request.user.is_authenticated:
+		if request.method == 'POST':
+			username = request.POST['username']
+			maximo = request.POST['max']
+			if username and maximo:
+				client = tweepy.Client(bearer_token=settings.BEARER_TOKEN)
+				try:
+					user = client.get_user(username=username)
+					tweets = client.get_liked_tweets(id=user.data.id, max_results=maximo, user_fields=['username'], expansions='author_id')
+					users = {u["id"]: u for u in tweets.includes['users']}
+					"""
+					for tweet in tweets.data:
+						print(tweet.id , tweet.text, users[tweet.author_id].username)
+					"""
+					"""
+					busqueda = Busqueda()
+					busqueda.user = request.user
+					busqueda.tipo = 'Tweets likeados por el usuario indicado'
+					busqueda.query = username
+					busqueda.maximo = maximo
+					busqueda.fecha = datetime.datetime.now().strftime("%x") + " " + datetime.datetime.now().strftime("%X")
+					busqueda.save()
+					"""
+					lista_usuarios = []
+					for x in users.values():
+						lista_usuarios.append(x)
+					lista_definitiva = zip(tweets.data, lista_usuarios) 
+				except tweepy.errors.BadRequest:
+					print("error")		    
+				context = {
+					'lista_definitiva' : lista_definitiva
+				}
+				return render(request, 'main/liked_tweets.html',context)
+		return render(request=request, template_name='main/liked_tweets.html')
+	else:
+		return redirect('djangoApp:login')					
 def historial_busquedas(request):
 	query_results = Busqueda.objects.filter(user_id=request.user)
 	context = {'query_results' : query_results}
