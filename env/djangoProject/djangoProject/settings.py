@@ -41,11 +41,11 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 # Twitter credentials
-CONSUMER_KEY='5KSJk7AYIjuCLaeNjTJsbwhYs'
-CONSUMER_SECRET='DPvtxrvjKPUx2uDaFopiiyrIEVMUGWwJM6GGy5Rg7pgViTwMEe'
-BEARER_TOKEN='AAAAAAAAAAAAAAAAAAAAALyTVwEAAAAAW7pdoQ7z9unH4UoRS5DOgRsg4YQ%3D7d1dRsAdGEccztkiYPtREblgSmbzJcL2TcdF4WHhBe9ZJNNOzt'
-ACCESS_TOKEN='1437432837498707968-qqqVZnd911qi2RmGE8PpYoMxrGD9d7'
-ACCESS_TOKEN_SECRET='nM8q70ECZFqws8fkLTSUmOSUFhRGslJJ1Iny1M0uet8p1'
+CONSUMER_KEY='**********************************'
+CONSUMER_SECRET='**********************************'
+BEARER_TOKEN='**********************************'
+ACCESS_TOKEN='**********************************'
+ACCESS_TOKEN_SECRET='**********************************'
 
 # Application definition
 
@@ -162,5 +162,5 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'twythonprojext123@gmail.com'
-EMAIL_HOST_PASSWORD = 'gjqcjfkfoprmwrzx'
+EMAIL_HOST_USER = '**********************************'
+EMAIL_HOST_PASSWORD = '**********************************'
